@@ -9,10 +9,10 @@ namespace GiftExchange
     class Participant
     {
         public readonly string name;
-        public readonly string emailAddress;
+        public readonly List<string> emailAddress;
         Participant recipient;
 
-        public Participant(string name, string emailAddress)
+        public Participant(string name, List<string> emailAddress)
         {
             this.name = name;
             this.emailAddress = emailAddress;
@@ -58,8 +58,10 @@ namespace GiftExchange
 
             participants.ForEach(participant =>
             {
-                var toAddress = new MailAddress(participant.emailAddress, participant.name);
-                string body = @$"Hi {participant.name},
+                participant.emailAddress.ForEach(email =>
+                {
+                    var toAddress = new MailAddress(email, participant.name);
+                    string body = @$"Hi {participant.name},
 
 Happy holidays! Thanks for participating in our family gift exchange. This year you'll choose a gift for {participant.Recipient.name}.
 As a reminder, each person or couple participating will purchase just one gift valued between $75 to $100 for their recipient. Recipients have been randomly assigned using this application: https://github.com/tpearce01/GiftExchange. 
@@ -69,14 +71,15 @@ Let me know if you have any questions!
 Cheers,
 Tyler
 ";
-                using (var message = new MailMessage(fromAddress, toAddress)
-                {
-                    Subject = subject,
-                    Body = body
-                })
-                {
-                    smtp.Send(message);
-                }
+                    using (var message = new MailMessage(fromAddress, toAddress)
+                    {
+                        Subject = subject,
+                        Body = body
+                    })
+                    {
+                        smtp.Send(message);
+                    }
+                });
             });           
         }
     }
@@ -85,8 +88,10 @@ Tyler
     {
         // Static list of individuals participating in the gift exchange
         static List<Participant> participants = new List<Participant>{
-            new Participant("Demo", "example@example.com"),
-            new Participant("Demo 2", "example2@example.com")
+            new Participant("Tyler & Tyler1", new List<string> { "tylerpearcedev@gmail.com", "tylerpearcedev+1@gmail.com" }),
+            new Participant("Tyler 2", new List<string> { "tylerpearcedev+2@gmail.com" }),
+            new Participant("Tyler 3", new List<string> { "tylerpearcedev+3@gmail.com" }),
+            new Participant("Tyler 4", new List<string> { "tylerpearcedev+4@gmail.com" })
         };
 
         static void Main(string[] args)
