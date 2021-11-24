@@ -41,25 +41,43 @@ namespace GiftExchange
         public static void SendParticipationEmail(List<Participant> participants)
         {
             // TODO: Not like this
-            const string senderAddress = "tylerpearcedev@gmail.com";
+            const string senderAddress = "";
             const string password = "";
-            var smtpClient = new SmtpClient("smtp.gmail.com")
+            const string subject = "Family Gift Exchange Assignment";
+            var fromAddress = new MailAddress(senderAddress, "Tyler Pearce");
+
+            var smtp = new SmtpClient
             {
+                Host = "smtp.gmail.com",
                 Port = 587,
-                Credentials = new NetworkCredential(senderAddress, password),
                 EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, password)
             };
 
             participants.ForEach(participant =>
             {
-                smtpClient.Send(senderAddress, participant.Recipient.emailAddress, "Family Gift Exchange Assignment", @$"Hi {participant.name},
+                var toAddress = new MailAddress(participant.emailAddress, participant.name);
+                string body = @$"Hi {participant.name},
 
-Happy holidays! Thanks for participating in our family gift exchange. This year you'll choose a gift for ${participant.Recipient.name}.
-As a reminder, each person or couple participating will purchase just one gift valued between $75 to $100 for their recipient. Recipients have been randomly assigned
-");
-            });
+Happy holidays! Thanks for participating in our family gift exchange. This year you'll choose a gift for {participant.Recipient.name}.
+As a reminder, each person or couple participating will purchase just one gift valued between $75 to $100 for their recipient. Recipients have been randomly assigned using this application: https://github.com/tpearce01/GiftExchange. 
 
-           
+Let me know if you have any questions!
+
+Cheers,
+Tyler
+";
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = subject,
+                    Body = body
+                })
+                {
+                    smtp.Send(message);
+                }
+            });           
         }
     }
 
@@ -67,8 +85,8 @@ As a reminder, each person or couple participating will purchase just one gift v
     {
         // Static list of individuals participating in the gift exchange
         static List<Participant> participants = new List<Participant>{
-            new Participant("Tyler", "tylerpearcedev@gmail.com"),
-            new Participant("Tyler 2", "pearcetyler@yahoo.com")
+            new Participant("Demo", "example@example.com"),
+            new Participant("Demo 2", "example2@example.com")
         };
 
         static void Main(string[] args)
